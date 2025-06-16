@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\Code;
+use App\Jobs\SendCodeJob;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Jobs\ResetPasswordJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -73,6 +76,72 @@ class AuthController extends Controller
         }
     }
 
+    public function loginServeur(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 422);
+        }
+        $user = User::whereEmail($request->email)->first();
+        if ($user) {
+            if ($user->type == 1) {
+                if (Hash::check($request->password, $user->password)) {
+                    $token = $user->createToken('Laravel Password Grant Client')->accessToken;
+                    $response = ['token' => $token];
+                    $message = 'success';
+                    $user->online = true;
+                    $user->update();
+                    return response(['user' => $user, 'access_token' => $response, 'message' => $message]);
+                } else {
+                    $response = ["message" => "mot de passe incorrect"];
+                    return response($response, 422);
+                }
+            } else {
+                $response = ["message" => 'accès réservé au personnel'];
+                return response($response, 422);
+            }
+        } else {
+            $response = ["message" => "cette utilisateur n'existe pas"];
+            return response($response, 422);
+        }
+    }
+
+    public function loginAdmin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 422);
+        }
+        $user = User::whereEmail($request->email)->first();
+        if ($user) {
+            if ($user->type == 2) {
+                if (Hash::check($request->password, $user->password)) {
+                    $token = $user->createToken('Laravel Password Grant Client')->accessToken;
+                    $response = ['token' => $token];
+                    $message = 'success';
+                    $user->online = true;
+                    $user->update();
+                    return response(['user' => $user, 'access_token' => $response, 'message' => $message]);
+                } else {
+                    $response = ["message" => "mot de passe incorrect"];
+                    return response($response, 422);
+                }
+            } else {
+                $response = ["message" => 'accès réservé au personnel'];
+                return response($response, 422);
+            }
+        } else {
+            $response = ["message" => "cette utilisateur n'existe pas"];
+            return response($response, 422);
+        }
+    }
+
     public function editUser(Request $request)
     {
         $user = User::find(Auth::user()->id)->first();
@@ -84,6 +153,87 @@ class AuthController extends Controller
 
         $user->update();
         return response()->json(['message' => $user['avatar']]);
+    }
+
+    public function user()
+    {
+        $user = User::find(Auth::user()->id)->first();
+        return response()->json([$user]);
+    }
+
+    public function deletedUser($id)
+    {
+        User::find($id)->delete();
+        return response()->json(['message' => 'utilisateur supprimer']);
+    }
+
+    // envoyer les mails a un user ayant deja un compte
+    public function sendmail(Request $request)
+    {
+        $user = User::whereEmail($request->email)->first();
+        $code = rand(1542, 9999);
+        if ($user) {
+            $codelink = Code::where('email', $request->email)->first();
+            if ($codelink) {
+                Code::where('email', $request->email)->update(['code' => $code]);
+            } else {
+                Code::create(['email' => $request->email, 'code' => $code]);
+            }
+
+            SendCodeJob::dispatch($user, $code);
+            return response()->json([
+                'message' => true,
+                'user' => $user,
+            ]);
+        } else {
+            return response()->json([
+                'message' => "Aucun compte trouve"
+            ], 422);
+        }
+    }
+
+
+    // pour la verification de l'adresse mail
+    public function send(Request $request)
+    {
+
+        $code = rand(2657, 9999);
+        //Mail::to($request->email)->send(new ResetPasswordMail($code));
+        $preuv = Code::where("email", $request->email)->first();
+        if ($preuv) {
+            Code::where("email", $request->email)->update(['code' => $code]);
+        } else {
+            $codelink = new Code();
+            $codelink->email = $request->email;
+            $codelink->code = $code;
+            $codelink->save();
+        }
+
+        return response()->json(['message' => 'updated successfully']);
+    }
+
+    public function valitated(Request $request)
+    {
+        $line = Code::where("code", $request->code)->where("email", $request->email)->first();
+        if ($line) {
+            return response()->json([
+                'message' => true,
+                "code" => request('code'),
+                "email" => request('email'),
+            ]);
+        }
+        return response()->json([
+            'message' => false,
+            "code" => request('code'),
+            "email" => request('email'),
+        ], 422);
+    }
+
+    public function resetpassword(Request $request, $id)
+    {
+        User::find($id)->update(['password' => Hash::make(request('password'))]);
+        ResetPasswordJob::dispatch(User::find($id));
+        return response(['message' => 'updated successfully']);
     }
 
     public function logout(Request $request)
