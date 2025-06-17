@@ -51,13 +51,33 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:255',
+            'identifiant' => ['required', function ($attribute, $value, $fail) {
+            if (!filter_var($value, FILTER_VALIDATE_EMAIL) && !preg_match('/^\+?[0-9]{7,15}$/', $value)) {
+                $fail('Le champ doit être un email valide ou un numéro de téléphone.');
+            }
+        }],
             'password' => 'required|string|min:8',
         ]);
+
         if ($validator->fails()) {
             return response(['errors' => $validator->errors()->all()], 422);
+        };
+
+        $phone = null;
+        $email = null;
+        if(preg_match('/^\+?[0-9]{7,15}$/', $request->identifiant)) {
+            $phone = preg_replace('/\D/', '', $request->identifiant); // Extract digits from phone
+        } else {
+            $email = filter_var($request->identifiant, FILTER_VALIDATE_EMAIL) ? $request->identifiant : null;
         }
-        $user = User::whereEmail($request->email)->first();
+        $user = User::where(function ($query) use ($phone, $email) {
+            if ($phone) {
+                $query->where('phone', $phone);
+            }
+            if ($email) {
+                $query->whereEmail($email);
+            }
+        })->first();
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('Laravel Password Grant Client')->accessToken;
@@ -71,12 +91,12 @@ class AuthController extends Controller
                 return response($response, 422);
             }
         } else {
-            $response = ["message" => "cette utilisateur n'existe pas"];
+            $response = ["message" => "cet utilisateur n'existe pas"];
             return response($response, 422);
         }
     }
 
-    public function loginServeur(Request $request)
+    /* public function loginServeur(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
@@ -107,9 +127,9 @@ class AuthController extends Controller
             $response = ["message" => "cette utilisateur n'existe pas"];
             return response($response, 422);
         }
-    }
+    } */
 
-    public function loginAdmin(Request $request)
+    /* public function loginAdmin(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
@@ -140,7 +160,7 @@ class AuthController extends Controller
             $response = ["message" => "cette utilisateur n'existe pas"];
             return response($response, 422);
         }
-    }
+    } */
 
     public function editUser(Request $request)
     {
