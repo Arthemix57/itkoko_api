@@ -172,7 +172,7 @@ class AuthController extends Controller
         if ($request->totalpt) $user->totalpt = $request->totalpt;
 
         $user->update();
-        return response()->json(['message' => $user['avatar']]);
+        return response()->json(['message' => $user]);
     }
 
     public function user()
