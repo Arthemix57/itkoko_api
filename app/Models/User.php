@@ -12,12 +12,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    // Constants for user types
-    const TYPE_CLIENT = 0;
-    const TYPE_SERVER = 1;
-    const TYPE_ADMIN = 2;
-    const TYPE_OWNER = 3;
-
     /**
      * The attributes that are mass assignable.
      *
@@ -52,24 +46,4 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    public function isClient()
-    {
-        return $this->type === self::TYPE_CLIENT;
-    }
-
-    public function isServer()
-    {
-        return $this->type === self::TYPE_SERVER;
-    }
-
-    public function isAdmin()
-    {
-        return $this->type === self::TYPE_ADMIN;
-    }
-
-    public function isOwner()
-    {
-        return $this->type === self::TYPE_OWNER;
-    }
 }
