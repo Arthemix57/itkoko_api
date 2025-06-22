@@ -23,7 +23,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:12',
             'sexe' => 'required|string|max:6',
-            'phone' => 'required|number|max:9',
+            'phone' => 'required|numeric|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => [
                 'required',
@@ -83,8 +83,6 @@ class AuthController extends Controller
                 $token = $user->createToken('Laravel Password Grant Client')->accessToken;
                 $response = ['token' => $token];
                 $message = 'success';
-                $user->online = true;
-                $user->update();
                 return response(['user' => $user, 'access_token' => $response, 'message' => $message]);
             } else {
                 $response = ["message" => "mot de passe incorrect"];

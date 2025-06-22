@@ -15,9 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('libelle'); // Product name
             $table->text('description')->nullable();
-            $table->integer('point')->default(0); // Points required to redeem the product
             $table->decimal('pu', 10, 2)->default(0.00); // Unit price
-            $table->integer('prixpt'); // Price in points
             $table->integer('qte'); // qte
             $table->string('image'); // Image URL or path
             $table->boolean('is_active')->default(true); //
