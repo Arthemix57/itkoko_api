@@ -57,10 +57,8 @@ class ProduitController extends Controller
         $validator = Validator::make($request->all(), [
             'libelle' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'point' => 'required|integer|min:0',
             'pu' => 'required|numeric|min:0',
-            'prixpt' => 'required|integer|min:0',
-            'image' => 'required|string|max:255', // Assuming image is a URL or path
+            'image' => 'required|images|mimes:jpeg,png,jpg,gif,svg|max:2048', // Assuming image is a URL or path
         ]);
         // Validate the request data
         // You can add more validation rules as needed
@@ -70,10 +68,8 @@ class ProduitController extends Controller
 
         // Create the product using the validated data
         $request['is_active'] = $request->has('is_active') ? $request->is_active : true; // Default to true if not provided
-        $request['point'] = $request->point ? $request->point : 0; // Default to 0 if not provided
         $request['pu'] = $request->pu ? $request->pu : 0.00; // Default to 0.00 if not provided
         $request['qte'] = $request->qte ? $request->qte : 0; // Default to 0 if not provided
-        $request['prixpt'] = $request->prixpt ? $request->prixpt : 0; // Default to 0 if not provided
         $request['libelle'] = ucwords(Str::lower($request['libelle'])); // Normalize the product name
         $request['description'] = $request->description ? $request->description : ''; // Default to empty string if not provided
 
@@ -106,9 +102,7 @@ class ProduitController extends Controller
         $validator = Validator::make($request->all(), [
             'libelle' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
-            'point' => 'sometimes|required|integer|min:0',
             'pu' => 'sometimes|required|numeric|min:0',
-            'prixpt' => 'sometimes|required|integer|min:0', // Assuming image is a URL or path
         ]);
 
         if ($validator->fails()) {
@@ -117,10 +111,8 @@ class ProduitController extends Controller
 
         // Update the product with the validated data
         $request['is_active'] = $request->has('is_active') ? $request->is_active : true; // Default to true if not provided
-        $request['point'] = $request->point ? $request->point : 0; // Default to 0 if not provided
         $request['pu'] = $request->pu ? $request->pu : 0.00; // Default to 0.00 if not provided
         $request['qte'] = $request->qte ? $request->qte : 0; // Default to 0 if not provided
-        $request['prixpt'] = $request->prixpt ? $request->prixpt : 0; // Default to 0 if not provided
         $request['libelle'] = ucwords(Str::lower($request['libelle'])); // Normalize the product name
         $request['description'] = $request->description ? $request->description : ''; // Default to empty string if not provided
 

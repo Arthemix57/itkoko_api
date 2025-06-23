@@ -19,10 +19,8 @@ class Produit extends Model
     protected $fillable = [
         'libelle',
         'description',
-        'point',
         'pu',
         'qte',
-        'prixpt',
         'image',
     ];
 }
