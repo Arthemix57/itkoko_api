@@ -59,4 +59,5 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/produits/{id}', 'update'); // Update a specific product by ID
         Route::delete('/produits/{id}', 'destroy')->middleware('admin'); // Delete a specific product by ID
     });
+});   
 });
