@@ -16,7 +16,7 @@ class IsServer
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || Auth::user()->type != 1) {
+        if (!Auth::check() || Auth::user()->type != 1 || Auth::user()->is_active == false) {
             return abort(403, 'Accès interdit');
         }
     

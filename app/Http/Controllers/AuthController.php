@@ -16,12 +16,34 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     //
+    function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['register', 'login', 'sendmail', 'send', 'valitated', 'resetpassword']]);
+    }
+
+    public function __invoke()
+    {
+        return response()->json(['message' => 'Welcome to the API']);
+    }
+
+    public function index()
+    {
+        $users = User::all();
+        return response()->json(['users' => $users]);
+    }
+
+    public function getallusers()
+    {
+        $users = User::where('type', 0)->get();
+        $servers = User::where('type', 1)->get();
+        return response()->json(['servers' => $servers, 'users' => $users]);
+    }
 
     public function register(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:12',
+            'name' => 'required|string|max:255',
             'sexe' => 'required|string|max:6',
             'phone' => 'required|numeric|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
@@ -40,7 +62,38 @@ class AuthController extends Controller
         $request['phone'] = $request['phone'];
         $request['sexe'] = $request['sexe'] ? $request['sexe'] : 'Homme';
         $request['totalpt'] = $request['totalpt'] ? $request['totalpt'] : 0;
-        $request['type'] = $request['type'] ? $request['type']  : 0;
+        $user = User::create($request->toArray());
+        $token = $user->createToken('Laravel Password Grant Client')->accessToken;
+        $response = ['token' => $token];
+
+        return response(['user' => $user, 'access_token' => $response]);
+    }
+
+    public function registerserver(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'sexe' => 'required|string|max:6',
+            'phone' => 'required|numeric|unique:users',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => [
+                'required',
+                'string',
+                'min:6',
+            ],
+        ]);
+        if ($validator->fails()) {
+            return response(['errors' => $validator->errors()->all()], 422);
+        }
+        $request['password'] = Hash::make($request['password']);
+        $request['name'] = ucwords(Str::lower($request['name']));
+        $request['remember_token'] = Str::random(10);
+        $request['phone'] = $request['phone'];
+        $request['is_active'] = $request->has('is_active') ? $request->is_active : true; // Default to true if not provided
+        $request['sexe'] = $request['sexe'] ? $request['sexe'] : 'Homme';
+        $request['totalpt'] = $request['totalpt'] ? $request['totalpt'] : 0;
+        $request['type'] = 1;
         $user = User::create($request->toArray());
         $token = $user->createToken('Laravel Password Grant Client')->accessToken;
         $response = ['token' => $token];
@@ -159,6 +212,27 @@ class AuthController extends Controller
             return response($response, 422);
         }
     } */
+
+    public function editIsActive($id)
+    {
+        $user = User::find($id);
+        if ($user) {
+            if ($user->type == 1) {
+                $user->is_active = !$user->is_active; // Default to true if not provided
+                if ($user->is_active) {
+                    $message = 'serveur(se) actif(ve)';
+                } else {
+                    $message = 'serveur(se) desactivé(e)';
+                }
+                $user->update();
+                return response()->json(['message' => $message, 'user' => $user]);
+            } else {
+                return response()->json(['message' => 'accès réservé au personnel'], 403);
+            }
+        } else {
+            return response()->json(['message' => 'utilisateur non trouve'], 404);
+        }
+    }
 
     public function editUser(Request $request)
     {

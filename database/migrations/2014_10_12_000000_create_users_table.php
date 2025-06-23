@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('totalpt')->default(0);
             $table->string('phone')->unique();
             $table->string('email')->unique();
+            $table->boolean('is_active')->nullable()->default(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

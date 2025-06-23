@@ -30,6 +30,7 @@ class User extends Authenticatable
         'sexe',
         'type',
         'totalpt',
+        'is_active',
         'password',
     ];
 

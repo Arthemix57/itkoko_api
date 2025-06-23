@@ -34,10 +34,14 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware('auth:api')->group(function () {
     // pour les requetes commune
     Route::controller(AuthController::class)->group(function () {
-        Route::get('/logout', 'logout');
         Route::get('/user', 'user');
-        Route::put('editUser/{id}', 'editUser');
-        Route::delete('/deleteUser/{id}', 'deleteUser');
+        Route::get('/logout', 'logout');
+        Route::put('edit/user/{id}', 'editUser');
+        Route::delete('/delete/user/{id}', 'deleteUser');
+        Route::get('/get/users', 'index')->middleware('server'); // Get all users
+        Route::post('register/server', 'registerserver')->middleware('admin'); // Register a new server
+        Route::get('/get/usersandservers', 'getallusers')->middleware('admin'); // Get all users and servers
+        Route::put('edit/statut/server/{id}', 'editIsActive')->middleware('admin'); // Edit server status
     });
 
     // pour les requetes produits
