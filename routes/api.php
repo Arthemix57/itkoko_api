@@ -44,7 +44,8 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::controller(PubliciteController::class)->group(function () {
-        Route::get('publicites', 'indexforusers'); // Publicities for users
+        Route::get('publicites', 'index')->middleware('admin'); // Publicities for admin
+        Route::get('publicite/users', 'indexforusers'); // Publicities for users
         Route::get('publicite/show/{id}', 'show'); // Show specific publicity
         Route::post('publicites', 'store')->middleware('admin'); // Create a new publicity
         Route::put('publicite/update/{id}', 'update')->middleware('admin'); // Update a specific publicity
