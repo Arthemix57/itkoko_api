@@ -1,9 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProduitController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +42,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     // pour les requetes produits
-    Route::controller(App\Http\Controllers\ProduitController::class)->group(function () {
+    Route::controller(ProduitController::class)->group(function () {
         Route::get('/produits', 'index'); // Get all products
         Route::get('/produits/users', 'indexforusers')->middleware('users'); // Get all products for users
         Route::get('/produits/{id}', 'show'); // Get a specific product by ID
