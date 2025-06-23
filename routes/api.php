@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PubliciteController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -40,5 +41,13 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/user', 'user');
         Route::put('editUser/{id}', 'editUser');
         Route::delete('/deleteUser/{id}', 'deleteUser');
+    });
+
+    Route::controller(PubliciteController::class)->group(function () {
+        Route::get('publicites', 'indexforusers'); // Publicities for users
+        Route::get('publicite/show/{id}', 'show'); // Show specific publicity
+        Route::post('publicites', 'store')->middleware('admin'); // Create a new publicity
+        Route::put('publicite/update/{id}', 'update')->middleware('admin'); // Update a specific publicity
+        Route::delete('publicite/delete/{id}', 'destroy')->middleware('admin'); // Delete a specific publicity
     });
 });
