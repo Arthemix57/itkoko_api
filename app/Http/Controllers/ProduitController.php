@@ -58,7 +58,7 @@ class ProduitController extends Controller
             'libelle' => 'required|string|max:255',
             'description' => 'nullable|string',
             'pu' => 'required|numeric|min:0',
-            'image' => 'required|string|max:255', // Assuming image is a URL or path
+            'image' => 'required|images|mimes:jpeg,png,jpg,gif,svg|max:2048', // Assuming image is a URL or path
         ]);
         // Validate the request data
         // You can add more validation rules as needed
