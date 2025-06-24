@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Publicite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
@@ -78,6 +79,35 @@ class PubliciteController extends Controller
             'message' => 'Publicity created successfully',
         ]);
     }
+
+    /* public function desactivePublicite() {
+        // Logic to retrieve and return all publicities that are not active
+        $publicites = Publicite::where('is_active', true)->get(); // Example of retrieving all non-active publicities
+
+        if ($publicites->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No active publicities found',
+            ], 404);
+        }
+
+        //En Laravel 10, la comparaison de deux dates de type datetime peut être réalisée en utilisant la classe Carbon, qui est intégrée dans Laravel pour la manipulation des dates. Vous pouvez comparer les dates en utilisant des méthodes telles que eq(), ne(), gt(), gte(), lt(), et lte() pour vérifier l'égalité, l'inégalité, la supériorité, la supériorité ou l'égalité, l'infériorité, et l'infériorité ou l'égalité respectivement. 
+
+        foreach ($publicites as $key => $value) {
+            if (Carbon::parse($value->date_fin)->lte(Carbon::parse(Carbon::now()))) {
+                $value->is_active = false; // Set the publicity as inactive if the start date is equal to the end date
+                $value->update();
+            }
+        }
+
+         // Here you would typically return the publicities from the database
+        return response()->json([
+            'data' => $publicites,
+            'status' => 'success',
+            'message' => 'List of active publicities',
+            // Here you would typically return the publicities from the database
+        ]);
+    } */
 
     public function update(Request $request, $id) {
         // Logic to update an existing publicity

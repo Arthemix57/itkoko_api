@@ -73,7 +73,7 @@ class AuthController extends Controller
 
     public function editUser(Request $request)
     {
-        $user = User::find(Auth::user()->id)->first();
+        $user = User::find(Auth::user()->id);
         if ($request->name) $user->name = $request->name;
         if ($request->phone) $user->phone = $request->phone;
         if ($request->sexe) $user->sexe = $request->sexe;
@@ -86,7 +86,6 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        User::find(Auth::user()->id)->first();
         $token = $request->user()->token();
         $token->revoke();
         $response = ['message' => 'You have been successfully logged out!'];
