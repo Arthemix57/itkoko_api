@@ -253,7 +253,7 @@ class AuthController extends Controller
         return response()->json([$user]);
     }
 
-    public function deletedUser($id)
+    public function deleteUser($id)
     {
         User::find($id)->delete();
         return response()->json(['message' => 'utilisateur supprimer']);
